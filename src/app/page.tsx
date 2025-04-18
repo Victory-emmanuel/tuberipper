@@ -39,8 +39,8 @@ export default function Home() {
 
       // Generate dummy download links
       const videoId = youtubeLink.split("v=")[1] || youtubeLink.split("youtu.be/")[1];
-      const mp4Link = `https://example.com/download/${videoId}_${videoResolution}.mp4`;
-      const mp3Link = `https://example.com/download/${videoId}_${audioQuality}.mp3`;
+      const mp4Link = `https://tuberipper.vercel.app/download/${videoId}_${videoResolution}.mp4`;
+      const mp3Link = `https://tuberipper.vercel.app/download/${videoId}_${audioQuality}.mp3`;
 
       setDownloadLinks({ mp4: mp4Link, mp3: mp3Link });
     } catch (err: any) {
