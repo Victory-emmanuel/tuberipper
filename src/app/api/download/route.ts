@@ -1,8 +1,7 @@
-<CODE_BLOCK>
+
 ```typescript
 import { NextRequest, NextResponse } from 'next/server';
 import ytdl from 'ytdl-core';
-
 export async function POST(req: NextRequest) {
   try {
     const { youtubeLink, videoResolution, audioQuality } = await req.json();
@@ -42,4 +41,3 @@ export async function POST(req: NextRequest) {
   }
 }
 ```
-</CODE_BLOCK>
