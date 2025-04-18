@@ -51,6 +51,23 @@ export default function Home() {
     }
   };
 
+  const DownloadLink = ({ href, format, quality }: { href: string | null, format: string, quality: string }) => {
+    if (!href) return null;
+
+    return (
+      <div className="space-y-2">
+        <p className="font-semibold">{format.toUpperCase()} Download Link:</p>
+        <a
+          href={href}
+          className="text-blue-500 hover:underline"
+          download={`${format}_${quality}`} // Use the download attribute to trigger download
+        >
+          Download {format.toUpperCase()} ({quality})
+        </a>
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-background p-4">
       <Card className="w-full max-w-md space-y-4 rounded-lg shadow-md">
@@ -114,22 +131,8 @@ export default function Home() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          {downloadLinks.mp4 && (
-            <div className="space-y-2">
-              <p className="font-semibold">MP4 Download Link:</p>
-              <a href={downloadLinks.mp4} className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">
-                Download MP4 ({videoResolution})
-              </a>
-            </div>
-          )}
-          {downloadLinks.mp3 && (
-            <div className="space-y-2">
-              <p className="font-semibold">MP3 Download Link:</p>
-              <a href={downloadLinks.mp3} className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">
-                Download MP3 ({audioQuality})
-              </a>
-            </div>
-          )}
+          <DownloadLink href={downloadLinks.mp4} format="mp4" quality={videoResolution} />
+          <DownloadLink href={downloadLinks.mp3} format="mp3" quality={audioQuality} />
         </CardContent>
       </Card>
     </div>
