@@ -1,5 +1,6 @@
 "use client";
 
+import ytdl from 'ytdl-core';
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -26,29 +27,47 @@ export default function Home() {
     setDownloadLinks({ mp4: null, mp3: null });
 
     // Basic validation - improve with regex
-    if (!youtubeLink.includes("youtube.com") && !youtubeLink.includes("youtu.be")) {
-      setError("Please enter a valid YouTube link.");
-      setIsLoading(false);
-      return;
-    }
+      if (!youtubeLink.includes("youtube.com") && !youtubeLink.includes("youtu.be")) {
+        setError("Please enter a valid YouTube link.");
+        setIsLoading(false);
+        return;
+      }
 
-    // Placeholder logic - replace with actual library integration
-    try {
-      // Simulate processing time
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      try {
+        // Simulate processing time
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Generate dummy download links
-      const videoId = youtubeLink.split("v=")[1] || youtubeLink.split("youtu.be/")[1];
-      const mp4Link = `https://tuberipper.vercel.app/download/${videoId}_${videoResolution}.mp4`;
-      const mp3Link = `https://tuberipper.vercel.app/download/${videoId}_${audioQuality}.mp3`;
+        // Validate YouTube URL
+        if (!ytdl.validateURL(youtubeLink)) {
+          setError("Invalid YouTube URL");
+          setIsLoading(false);
+          return;
+        }
 
-      setDownloadLinks({ mp4: mp4Link, mp3: mp3Link });
-    } catch (err: any) {
-      setError("Failed to generate download links. Please try again.");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
+        // Get video info
+        const info = await ytdl.getInfo(youtubeLink);
+        const videoTitle = info.videoDetails.title;
+
+        // Generate MP4 link
+        const format = ytdl.chooseFormat(info.formats, { quality: videoResolution, filter: 'videoandaudio' });
+        const mp4Link = format ? format.url : null;
+        if(!mp4Link){
+          setError("no mp4 link avaliable with the resolution selected");
+          setIsLoading(false);
+          return;
+        }
+
+        // Generate MP3 link (best audio format)
+        const audioFormat = ytdl.chooseFormat(info.formats, { quality: 'highestaudio' });
+        const mp3Link = audioFormat ? audioFormat.url : null;
+
+        setDownloadLinks({ mp4: mp4Link, mp3: mp3Link });
+      } catch (err: any) {
+        setError("Failed to generate download links. Please try again.");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
   };
 
   const DownloadLink = ({ href, format, quality }: { href: string | null, format: string, quality: string }) => {
