@@ -1,6 +1,5 @@
 "use client";
 
-import ytdl from 'ytdl-core';
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -26,47 +25,30 @@ export default function Home() {
     setError(null);
     setDownloadLinks({ mp4: null, mp3: null });
 
-    // Basic validation - improve with regex
-      if (!youtubeLink.includes("youtube.com") && !youtubeLink.includes("youtu.be")) {
-        setError("Please enter a valid YouTube link.");
-        setIsLoading(false);
-        return;
+    if (!youtubeLink.includes("youtube.com") && !youtubeLink.includes("youtu.be")) {
+      setError("Please enter a valid YouTube link.");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ youtubeLink, videoResolution, audioQuality }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to generate download links");
       }
 
-      try {
-        // Simulate processing time
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-
-        // Validate YouTube URL
-        if (!ytdl.validateURL(youtubeLink)) {
-          setError("Invalid YouTube URL");
-          setIsLoading(false);
-          return;
-        }
-
-        // Get video info
-        const info = await ytdl.getInfo(youtubeLink);
-        const videoTitle = info.videoDetails.title;
-
-        // Generate MP4 link
-        const format = ytdl.chooseFormat(info.formats, { quality: videoResolution, filter: 'videoandaudio' });
-        const mp4Link = format ? format.url : null;
-        if(!mp4Link){
-          setError("no mp4 link avaliable with the resolution selected");
-          setIsLoading(false);
-          return;
-        }
-
-        // Generate MP3 link (best audio format)
-        const audioFormat = ytdl.chooseFormat(info.formats, { quality: 'highestaudio' });
-        const mp3Link = audioFormat ? audioFormat.url : null;
-
-        setDownloadLinks({ mp4: mp4Link, mp3: mp3Link });
-      } catch (err: any) {
-        setError("Failed to generate download links. Please try again.");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
+      const data = await response.json();
+      setDownloadLinks(data.downloadLinks);
+    } catch (error: any) {
+      setError(error.message || "Failed to generate download links. Please try again.");
+    } finally {
+      setIsLoading(false);
       }
   };
 
